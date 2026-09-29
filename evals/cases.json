@@ -1,7 +1,34 @@
 [
   {
-    "id": "smoke-1",
+    "id": "rag-capabilities",
     "query": "这个项目要证明哪些能力？",
-    "expect_contains": ["RAG", "Tool"]
+    "expect_contains": ["RAG", "Tool"],
+    "expect_mode_in": ["agent", "rag_llm"]
+  },
+  {
+    "id": "rag-what-is-project",
+    "query": "kb_agent_lab 是做什么的？",
+    "expect_contains": ["知识库", "Agent"],
+    "expect_mode_in": ["agent", "rag_llm"]
+  },
+  {
+    "id": "rag-stack",
+    "query": "项目用了哪些技术栈？",
+    "expect_contains": ["FastAPI"],
+    "expect_mode_in": ["agent", "rag_llm"]
+  },
+  {
+    "id": "tool-search-hint",
+    "query": "请先用知识库工具查一下：什么是 Tool Calling？然后简要回答。",
+    "expect_contains": ["工具"],
+    "expect_tool": "search_kb",
+    "expect_mode_in": ["agent", "rag_llm"]
+  },
+  {
+    "id": "tool-note",
+    "query": "请把『评测很重要』这句话用工具保存成笔记，并告诉我是否保存成功。",
+    "expect_contains": ["保存"],
+    "expect_tool": "save_note",
+    "expect_mode_in": ["agent", "rag_llm"]
   }
 ]

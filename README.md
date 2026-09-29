@@ -7,8 +7,8 @@
 
 ## 当前进度
 
-- [x] **第 1 周**：语料入库（Chroma）+ `POST /ask` 检索带引用（有 Key 则 LLM 作答）
-- [ ] **第 2 周**：Tool Calling + LangGraph + `evals/` 回归
+- [x] **第 1 周**：语料入库（Chroma）+ `POST /ask` 检索带引用
+- [x] **第 2 周**：Tool Calling（search_kb / http_get / save_note）+ LangGraph ReAct + `evals/` 回归
 
 ## 快速开始
 
@@ -19,46 +19,40 @@ source .venv/bin/activate
 pip install -r requirements.txt
 pip install -e .
 
-cp .env.example .env   # 可选：填入 OPENAI_API_KEY / BASE_URL / MODEL
+cp .env.example .env   # 填入 OPENAI_API_KEY / BASE_URL / MODEL
+# ASK_MODE=agent 默认走 LangGraph+Tools；改成 rag 则退回纯 RAG
 
-# 把 Markdown 放入 docs/ 后入库
 python scripts/ingest.py
-
-# 启动 API
 uvicorn kb_agent_lab.api:app --app-dir src --reload --port 8765
 ```
 
-另开终端试问：
+试问页：http://127.0.0.1:8765/  
+评测：`python evals/run_eval.py`
 
-```bash
-curl -s http://127.0.0.1:8765/health
-curl -s http://127.0.0.1:8765/ask \
-  -H 'content-type: application/json' \
-  -d '{"query":"这个项目要证明哪些能力？"}'
-```
-
-未配置 API Key 时，`/ask` 仍返回检索片段（`mode=retrieval_only`）；配置后为 `mode=rag_llm`，答案带 `[1][2]` 引用。
-
-也可通过接口重新入库：`POST /ingest`，body `{"reset": true}`。
-
-## 目录
+## 架构（简图）
 
 ```
-kb_agent_lab/
-├── docs/                 # 知识库语料
-├── src/kb_agent_lab/
-│   ├── api.py            # FastAPI：/health /ask /ingest
-│   ├── answer.py         # 检索 + LLM 作答
-│   ├── rag.py            # 切分 / Chroma 入库 / 检索
-│   ├── tools.py          # Week 2
-│   └── graph.py          # Week 2
-├── scripts/ingest.py
-└── evals/                # Week 2
+用户问题
+  ├─ 预检索 Chroma → UI「① retrieved」
+  └─ LangGraph ReAct Agent
+        ├─ search_kb / http_get / save_note
+        ├─ tool_traces → UI「②」
+        └─ 最终回答 → UI「④」
 ```
+
+Agent 失败时自动回退到经典 RAG（`mode=rag_llm`，带 `agent_error`）。
+
+## 工具
+
+| 工具 | 作用 |
+| --- | --- |
+| `search_kb` | 本地知识库向量检索 |
+| `http_get` | 公开 URL GET（截断文本） |
+| `save_note` | 追加写入 `data/notes/notes.md` |
 
 ## 两周里程碑
 
-**第 1 周 — RAG + API**（已完成骨架可跑）
+**第 1 周 — RAG + API**
 
 - [x] 语料入库（`docs/` → Chroma）
 - [x] `POST /ask`：检索 + 带引用回答
@@ -66,7 +60,7 @@ kb_agent_lab/
 
 **第 2 周 — Tools + 编排 + 评测**
 
-- [ ] 接入 ≥3 个 Tool
-- [ ] LangGraph 多步图跑通
-- [ ] `evals/run_eval.py` 可回归
-- [ ] README 补架构图 + 录屏
+- [x] 接入 ≥3 个 Tool
+- [x] LangGraph 多步图跑通
+- [x] `evals/run_eval.py` 可回归
+- [ ] README 录屏（可选，自行补）
