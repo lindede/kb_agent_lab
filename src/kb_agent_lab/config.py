@@ -1,14 +1,26 @@
+from __future__ import annotations
+
 from pathlib import Path
+import os
 
 from dotenv import load_dotenv
-import os
 
 load_dotenv()
 
 ROOT = Path(__file__).resolve().parents[2]
-DOCS_DIR = Path(os.getenv("DOCS_DIR", ROOT / "docs"))
-CHROMA_DIR = Path(os.getenv("CHROMA_DIR", ROOT / "data" / "chroma"))
+DOCS_DIR = Path(os.getenv("DOCS_DIR", ROOT / "docs")).expanduser().resolve()
+CHROMA_DIR = Path(os.getenv("CHROMA_DIR", ROOT / "data" / "chroma")).expanduser().resolve()
+COLLECTION_NAME = os.getenv("CHROMA_COLLECTION", "kb_agent_lab")
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
+OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini").strip()
+OPENAI_EMBEDDING_MODEL = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small").strip()
+
+CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "600"))
+CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "80"))
+RETRIEVE_K = int(os.getenv("RETRIEVE_K", "4"))
+
+
+def has_llm_key() -> bool:
+    return bool(OPENAI_API_KEY)
