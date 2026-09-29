@@ -1,0 +1,7 @@
+[
+  {
+    "id": "smoke-1",
+    "query": "这个项目要证明哪些能力？",
+    "expect_contains": ["RAG", "Tool"]
+  }
+]
