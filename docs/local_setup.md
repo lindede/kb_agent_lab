@@ -12,5 +12,6 @@
 - `OPENAI_API_KEY`
 - `OPENAI_BASE_URL`（可用国内兼容网关）
 - `OPENAI_MODEL`
+- `EMBEDDING_PROVIDER=local`（默认；很多网关不开 `/embeddings`，入库请用本地向量。若网关明确支持 embedding，再改成 `openai`）
 
-若暂时没有 Key，`/ask` 仍可返回检索片段（retrieval-only），但不生成完整 LLM 回答。
+未配置 Key 时，`/ask` 仍返回检索片段；有 Key 时用对话模型生成带引用回答（与 embedding 是否走远程无关）。

@@ -17,6 +17,10 @@ OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1").rstr
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini").strip()
 OPENAI_EMBEDDING_MODEL = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small").strip()
 
+# local = Chroma ONNX MiniLM (no remote embedding API)
+# openai = OpenAI-compatible /embeddings (many China gateways do NOT open this)
+EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "local").strip().lower()
+
 CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "600"))
 CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "80"))
 RETRIEVE_K = int(os.getenv("RETRIEVE_K", "4"))
@@ -24,3 +28,7 @@ RETRIEVE_K = int(os.getenv("RETRIEVE_K", "4"))
 
 def has_llm_key() -> bool:
     return bool(OPENAI_API_KEY)
+
+
+def use_openai_embeddings() -> bool:
+    return EMBEDDING_PROVIDER in {"openai", "remote"} and has_llm_key()

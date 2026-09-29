@@ -65,14 +65,21 @@ def _iter_doc_files(docs_dir: Path) -> list[Path]:
 
 
 def _embedding_function():
-    if config.has_llm_key():
+    # Chat API Key ≠ embedding access. Many gateways return 403 on /embeddings.
+    # Default to local ONNX; set EMBEDDING_PROVIDER=openai only if your gateway opens it.
+    if config.use_openai_embeddings():
         return embedding_functions.OpenAIEmbeddingFunction(
             api_key=config.OPENAI_API_KEY,
             api_base=config.OPENAI_BASE_URL,
             model_name=config.OPENAI_EMBEDDING_MODEL,
         )
-    # Offline-friendly default (ONNX MiniLM). Fine for smoke tests.
     return embedding_functions.DefaultEmbeddingFunction()
+
+
+def _embedding_label() -> str:
+    if config.use_openai_embeddings():
+        return f"openai:{config.OPENAI_EMBEDDING_MODEL}"
+    return "local-onnx"
 
 
 def get_collection(reset: bool = False):
@@ -123,7 +130,7 @@ def ingest(docs_dir: Path | None = None, reset: bool = True) -> dict[str, Any]:
         "files": len(files),
         "chunks": len(documents),
         "collection": config.COLLECTION_NAME,
-        "embedding": "openai" if config.has_llm_key() else "default-onnx",
+        "embedding": _embedding_label(),
     }
 
 
